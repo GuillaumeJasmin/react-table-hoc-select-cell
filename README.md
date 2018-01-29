@@ -1,6 +1,8 @@
 ReactTable HOC for selectable cells 
 ===================
 
+IMPORTANT: Not yep published on NPM !
+
 ## Commands available
 
 * CLICK
@@ -9,9 +11,9 @@ ReactTable HOC for selectable cells
 
 ## Config
 
-```
+<!-- ```
 npm install react-table-hoc-select-cell --save
-```
+``` -->
 
 ```js
 import ReactTable from 'react-table';
