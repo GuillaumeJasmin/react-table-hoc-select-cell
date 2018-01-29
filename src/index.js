@@ -120,7 +120,8 @@ export default (ReactTable) => {
                 Cell: (row, ...args) => {
                   const isSelected = this.isSelected({ rowIndex: row.index, columnId: row.column.id });
                   const selectData = {
-                    onClick: this.onSelectCell,
+                    onSelect: this.onSelectCell,
+                    selectedCells,
                     isSelected,
                   };
                   const nextArgs = [...args, selectData];
