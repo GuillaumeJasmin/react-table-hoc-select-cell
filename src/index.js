@@ -10,12 +10,12 @@ export default (ReactTable) => {
       }
 
       this.lastSelectedCell = null;
-      this.isSelected = this.isSelected.bind(this);
+      this.selected = this.selected.bind(this);
       this.findIndex = this.findIndex.bind(this);
       this.onSelectCell = this.onSelectCell.bind(this);
     }
 
-    isSelected (data) {
+    selected (data) {
       return this.findIndex(data) !== -1;
     }
 
@@ -28,6 +28,8 @@ export default (ReactTable) => {
     onSelectCell (event, row) {
       event.stopPropagation();
       event.preventDefault();
+      const { enableMultipleColsSelect } = this.props;
+      const { selectedCells } = this.state;
 
       let cellData = {
         rowIndex: row.index,
@@ -35,6 +37,29 @@ export default (ReactTable) => {
         columnId: row.column.id,
         original: row.original,
       };
+
+      let replace = false;
+
+      var columnIdDifferent = selectedCells.find(({ columnId }) => columnId !== cellData.columnId);
+
+      if (columnIdDifferent) {
+        if (!enableMultipleColsSelect) {
+          replace = true;
+        } else if (Array.isArray(enableMultipleColsSelect)) {
+          const foundArray = enableMultipleColsSelect.find(items => items.includes(cellData.columnId) && items.includes(columnIdDifferent.columnId));
+          if (!foundArray) {
+            replace = true;
+          }
+        }
+      }
+
+      if (replace) {
+        this.setState({
+          selectedCells: [cellData],
+        });
+        this.lastSelectedCell = cellData;
+        return;
+      }
 
       // metaKey is CMD on Mac
       if (event.ctrlKey || event.metaKey) {
@@ -75,14 +100,13 @@ export default (ReactTable) => {
               original: inData._original,
             };
 
-            if (!this.isSelected(cellData)) {
+            if (!this.selected(cellData)) {
               selectedCells = [...selectedCells, cellData];
             }
           }
 
           return { selectedCells };
         });
-        // TODO
       } else {
         this.setState({
           selectedCells: [cellData],
@@ -113,16 +137,16 @@ export default (ReactTable) => {
             }
           }}
           columns={columns.map((column) => {
-            const { isSelectable, ...columnProps } = column;
-            if (isSelectable) {
+            const { selectable, ...columnProps } = column;
+            if (selectable) {
               return {
                 ...columnProps,
                 Cell: (row, ...args) => {
-                  const isSelected = this.isSelected({ rowIndex: row.index, columnId: row.column.id });
+                  const selected = this.selected({ rowIndex: row.index, columnId: row.column.id });
                   const selectData = {
                     onSelect: this.onSelectCell,
                     selectedCells,
-                    isSelected,
+                    selected,
                   };
                   const nextArgs = [...args, selectData];
                   return columnProps.Cell(row, ...nextArgs);
@@ -155,7 +179,12 @@ export default (ReactTable) => {
   ReactTableSelectableCell.propTypes = {
     wrappedInstanceRef: PropTypes.func,
     columns: PropTypes.array.isRequired,
+    enableMultipleColsSelect: PropTypes.oneOfType([PropTypes.bool, PropTypes.array])
   };
+
+  ReactTableSelectableCell.defaultProps = {
+    enableMultipleColsSelect: true,
+  }
 
   return ReactTableSelectableCell;
 };

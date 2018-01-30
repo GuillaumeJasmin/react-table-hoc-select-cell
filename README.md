@@ -26,11 +26,12 @@ const ReactTableSelectableCell = createTable(ReactTable);
 render () {
   return (
     <ReactTableSelectableCell
+      enableMultipleColsSelect={false}
       columns={[
         {
-          isSelectable: true,
-          Cell: (row, { onSelect, isSelected, selectedCells }) => {
-            const style = { border: isSelected ? 'border solid 1px' : null };
+          selectable: true,
+          Cell: (row, { onSelect, selected, selectedCells }) => {
+            const style = { border: selected ? 'border solid 1px' : null };
             return (
               <div onClick={selectData.onSelect} style={style}>
                 {row.value}
@@ -44,3 +45,9 @@ render () {
 }
 ```
 
+# Config
+* enableMultipleColsSelect - bool|array - if false, you can only select the cells of the same column id.
+If it's an array, you can specify wich column is associated with other
+```js
+enableMultipleColsSelect={[['name', 'firstName'], ['age', 'weight']]};
+```
