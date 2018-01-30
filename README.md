@@ -11,9 +11,9 @@ IMPORTANT: Not yep published on NPM !
 
 ## Config
 
-<!-- ```
+```
 npm install react-table-hoc-select-cell --save
-``` -->
+```
 
 ```js
 import ReactTable from 'react-table';
