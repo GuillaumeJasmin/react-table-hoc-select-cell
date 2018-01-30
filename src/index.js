@@ -151,15 +151,6 @@ export default (ReactTable) => {
                   const nextArgs = [...args, selectData];
                   return columnProps.Cell(row, ...nextArgs);
                 },
-                onChange: (row, value) => {
-                  if (columnProps.onChange) {
-                    if (selectedCells.length) {
-                      columnProps.onChange(selectedCells, value);
-                    } else {
-                      columnProps.onChange([row], value);
-                    }
-                  }
-                },
               };
             }
 
