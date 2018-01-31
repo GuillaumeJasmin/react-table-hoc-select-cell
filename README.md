@@ -42,7 +42,7 @@ In the next example, `name` and `firstname` column can be selected together, and
   ```
 
   * Function
-  
+
   ```js
   config = {
     enableMultipleColsSelect: (cellFrom, cellTo) => {
@@ -63,7 +63,7 @@ render () {
           Cell: (row, { selected, selectedCells, onSelect, unselectAllCells }) => {
             const style = { border: selected ? 'border solid 1px' : null };
             return (
-              <div onClick={selectData.onSelect} style={style}>
+              <div onClick={onSelect} style={style}>
                 {row.value}
               <div/>
             )
