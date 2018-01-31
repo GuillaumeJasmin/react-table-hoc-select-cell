@@ -1,8 +1,26 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export default (ReactTable) => {
-  class ReactTableSelectableCell extends React.Component {
+/**
+ *
+ * @param {ReactTable} ReactTable - ReactTable instance
+ * @param {object}     publicConfig - config
+ * @param {function}   publicConfig.retrievePrevOriginal - make possible to retrive previous original data
+ * @param {bool|array} publicConfig.enableMultipleColsSelect - enable multiple columns select
+ *
+ * @return {object} ReactTable instance
+ */
+export default (ReactTable, publicConfig) => {
+  const config = {
+    enableMultipleColsSelect: false,
+    ...publicConfig,
+  };
+
+  if (!Array.isArray(config.enableMultipleColsSelect) && !['boolean', 'function'].includes(typeof config.enableMultipleColsSelect)) {
+    throw new Error('react-table-hoc-select-cell: enableMultipleColsSelect must be an array or a boolean');
+  }
+
+  class ReactTableSelectableCell extends React.PureComponent {
     constructor (props) {
       super(props);
       this.state = {
@@ -13,6 +31,33 @@ export default (ReactTable) => {
       this.selected = this.selected.bind(this);
       this.findIndex = this.findIndex.bind(this);
       this.onSelectCell = this.onSelectCell.bind(this);
+      this.unselectAllCells = this.unselectAllCells.bind(this);
+    }
+
+    componentWillReceiveProps (nextProps) {
+      if (config.retrievePrevOriginal) {
+        this.setState((state) => {
+          const { selectedCells } = state;
+
+          if (!selectedCells.length) {
+            return null;
+          }
+
+          const nextSelectedCells = selectedCells.slice();
+          selectedCells.forEach((cell, index) => {
+            const nextOriginal = nextProps.data.find(original => config.retrievePrevOriginal(cell.original, original));
+            if (nextOriginal) {
+              nextSelectedCells[index].original = nextOriginal;
+            } else {
+              nextSelectedCells.splice(index, 1);
+            }
+          });
+
+          return {
+            selectedCells: nextSelectedCells
+          }
+        });
+      }
     }
 
     selected (data) {
@@ -20,36 +65,38 @@ export default (ReactTable) => {
     }
 
     findIndex (data) {
-      return this.state.selectedCells.findIndex(({ rowIndex, columnId }) => (
-        rowIndex === data.rowIndex && columnId === data.columnId
+      return this.state.selectedCells.findIndex(({ rowIndex, column }) => (
+        rowIndex === data.rowIndex && column.id === data.column.id
       ));
     }
 
     onSelectCell (event, row) {
       event.stopPropagation();
       event.preventDefault();
-      const { enableMultipleColsSelect } = this.props;
+      const { enableMultipleColsSelect } = config;
       const { selectedCells } = this.state;
 
       let cellData = {
         rowIndex: row.index,
         viewIndex: row.viewIndex,
-        columnId: row.column.id,
+        column: row.column,
         original: row.original,
       };
 
       let replace = false;
 
-      var columnIdDifferent = selectedCells.find(({ columnId }) => columnId !== cellData.columnId);
+      var cellDataWithDiffColumnId = selectedCells.find(({ column }) => column.id !== cellData.column.id);
 
-      if (columnIdDifferent) {
+      if (cellDataWithDiffColumnId) {
         if (!enableMultipleColsSelect) {
           replace = true;
         } else if (Array.isArray(enableMultipleColsSelect)) {
-          const foundArray = enableMultipleColsSelect.find(items => items.includes(cellData.columnId) && items.includes(columnIdDifferent.columnId));
+          const foundArray = enableMultipleColsSelect.find(items => items.includes(cellData.column.id) && items.includes(cellDataWithDiffColumnId.column.id));
           if (!foundArray) {
             replace = true;
           }
+        } else if (typeof enableMultipleColsSelect === 'function') {
+          replace = !enableMultipleColsSelect(cellData, cellDataWithDiffColumnId);
         }
       }
 
@@ -96,7 +143,7 @@ export default (ReactTable) => {
 
             cellData = {
               rowIndex: inData._index,
-              columnId: row.column.id,
+              column: row.column,
               original: inData._original,
             };
 
@@ -116,12 +163,18 @@ export default (ReactTable) => {
       this.lastSelectedCell = cellData;
     }
 
-    getWrappedInstance() {
+    getWrappedInstance () {
       if (this.wrappedInstance.getWrappedInstance) {
         return this.wrappedInstance.getWrappedInstance()
       }
 
       return this.wrappedInstance;
+    }
+
+    unselectAllCells () {
+      if (this.state.selectedCells.length) {
+        this.setState({ selectedCells: [] });
+      }
     }
 
     render() {
@@ -142,9 +195,10 @@ export default (ReactTable) => {
               return {
                 ...columnProps,
                 Cell: (row, ...args) => {
-                  const selected = this.selected({ rowIndex: row.index, columnId: row.column.id });
+                  const selected = this.selected({ rowIndex: row.index, column: row.column });
                   const selectData = {
                     onSelect: this.onSelectCell,
+                    unselectAllCells: this.unselectAllCells,
                     selectedCells,
                     selected,
                   };
@@ -170,12 +224,8 @@ export default (ReactTable) => {
   ReactTableSelectableCell.propTypes = {
     wrappedInstanceRef: PropTypes.func,
     columns: PropTypes.array.isRequired,
-    enableMultipleColsSelect: PropTypes.oneOfType([PropTypes.bool, PropTypes.array])
+    data: PropTypes.array,
   };
-
-  ReactTableSelectableCell.defaultProps = {
-    enableMultipleColsSelect: true,
-  }
 
   return ReactTableSelectableCell;
 };

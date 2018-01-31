@@ -19,18 +19,48 @@ npm install react-table-hoc-select-cell --save
 import ReactTable from 'react-table';
 import createTable from 'react-table-hoc-selectable-cell';
 
-const ReactTableSelectableCell = createTable(ReactTable);
+const ReactTableSelectableCell = createTable(ReactTable, config);
 ```
+
+# Config
+* ```retrievePrevOriginal``` - {function} - make possible to retrieve previous selected cells even the data was changed. It's usefull when you need to change the order of data and you to keep selected cells.
+  ```js
+  config = {
+    retrievePrevOriginal: (prevOriginal, nextOriginal) => prevOriginal.id === nextOriginal.id
+  }
+  ```
+
+* ```enableMultipleColsSelect``` - {bool | array | function} - default `false` - define if differents columns can be selected. You can choose to enable only some columns with an array.
+In the next example, `name` and `firstname` column can be selected together, and `personalEmail` with `workEmail`. But `name` column cannot be selected with `personalEmail`: 
+
+  * Array
+
+  ```js
+  config = {
+    enableMultipleColsSelect: [['name', 'firsname'], ['personalEmail', 'workEmail']]
+  }
+  ```
+
+  * Function
+  
+  ```js
+  config = {
+    enableMultipleColsSelect: (cellFrom, cellTo) => {
+      return cellFrom.column.id === cellTo.column.id;
+    }
+  }
+  ```
+
+# Render
 
 ```js
 render () {
   return (
     <ReactTableSelectableCell
-      enableMultipleColsSelect={false}
       columns={[
         {
           selectable: true,
-          Cell: (row, { onSelect, selected, selectedCells }) => {
+          Cell: (row, { selected, selectedCells, onSelect, unselectAllCells }) => {
             const style = { border: selected ? 'border solid 1px' : null };
             return (
               <div onClick={selectData.onSelect} style={style}>
@@ -45,9 +75,5 @@ render () {
 }
 ```
 
-# Config
-* enableMultipleColsSelect - bool|array - if false, you can only select the cells of the same column id.
-If it's an array, you can specify wich column is associated with other
-```js
-enableMultipleColsSelect={[['name', 'firstName'], ['age', 'weight']]};
-```
+# Public methods
+* unselectAllCells - make possible to unselect all cells
