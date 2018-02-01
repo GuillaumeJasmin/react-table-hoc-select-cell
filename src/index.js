@@ -177,9 +177,38 @@ export default (ReactTable, publicConfig) => {
       }
     }
 
+    handleColumnsRecursively (columns) {
+      const { selectedCells } = this.state;
+      return columns.map((column) => {
+        const { selectable, columns, ...columnProps } = column;
+        if (columns) {
+          return {
+            ...columnProps,
+            columns: this.handleColumnsRecursively(columns),
+          }
+        } else if (selectable) {
+          return {
+            ...columnProps,
+            Cell: (row, ...args) => {
+              const selected = this.selected({ rowIndex: row.index, column: row.column });
+              const selectData = {
+                onSelect: this.onSelectCell,
+                unselectAllCells: this.unselectAllCells,
+                selectedCells,
+                selected,
+              };
+              const nextArgs = [...args, selectData];
+              return columnProps.Cell(row, ...nextArgs);
+            },
+          };
+        }
+
+        return columnProps;
+      })
+    }
+
     render() {
       const { columns, wrappedInstanceRef, ...props } = this.props;
-      const { selectedCells } = this.state;
       this.data = props.data;
       return (
         <ReactTable
@@ -189,27 +218,7 @@ export default (ReactTable, publicConfig) => {
               wrappedInstanceRef(c);
             }
           }}
-          columns={columns.map((column) => {
-            const { selectable, ...columnProps } = column;
-            if (selectable) {
-              return {
-                ...columnProps,
-                Cell: (row, ...args) => {
-                  const selected = this.selected({ rowIndex: row.index, column: row.column });
-                  const selectData = {
-                    onSelect: this.onSelectCell,
-                    unselectAllCells: this.unselectAllCells,
-                    selectedCells,
-                    selected,
-                  };
-                  const nextArgs = [...args, selectData];
-                  return columnProps.Cell(row, ...nextArgs);
-                },
-              };
-            }
-
-            return columnProps;
-          })}
+          columns={this.handleColumnsRecursively(columns)}
           {...props}
         >
           {(state, makeTable) => {
