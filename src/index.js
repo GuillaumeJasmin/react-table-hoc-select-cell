@@ -20,7 +20,7 @@ export default (ReactTable, publicConfig) => {
     throw new Error('react-table-hoc-select-cell: enableMultipleColsSelect must be an array or a boolean');
   }
 
-  class ReactTableSelectableCell extends React.PureComponent {
+  class ReactTableSelectCell extends React.PureComponent {
     constructor (props) {
       super(props);
       this.state = {
@@ -60,13 +60,20 @@ export default (ReactTable, publicConfig) => {
       }
     }
 
+    componentWillUpdate (nextProps, nextState) {
+      const { onSelectedCellsWillChange } = this.props;
+      if (this.state.selectedCells !== nextState.selectedCells) {
+        onSelectedCellsWillChange(nextState.selectedCells);
+      }
+    }
+
     selected (data) {
       return this.findIndex(data) !== -1;
     }
 
     findIndex (data) {
-      return this.state.selectedCells.findIndex(({ rowIndex, column }) => (
-        rowIndex === data.rowIndex && column.id === data.column.id
+      return this.state.selectedCells.findIndex(({ index, column }) => (
+        index === data.index && column.id === data.column.id
       ));
     }
 
@@ -77,7 +84,7 @@ export default (ReactTable, publicConfig) => {
       const { selectedCells } = this.state;
 
       let cellData = {
-        rowIndex: row.index,
+        index: row.index,
         viewIndex: row.viewIndex,
         column: row.column,
         original: row.original,
@@ -142,7 +149,7 @@ export default (ReactTable, publicConfig) => {
             const inData = this.tableState.resolvedData[indexInResolvedData];
 
             cellData = {
-              rowIndex: inData._index,
+              index: inData._index,
               column: row.column,
               original: inData._original,
             };
@@ -180,17 +187,17 @@ export default (ReactTable, publicConfig) => {
     handleColumnsRecursively (columns) {
       const { selectedCells } = this.state;
       return columns.map((column) => {
-        const { selectable, columns, ...columnProps } = column;
+        const { columns, ...columnProps } = column;
         if (columns) {
           return {
             ...columnProps,
             columns: this.handleColumnsRecursively(columns),
           }
-        } else if (selectable) {
+        } else if (columnProps.Cell) {
           return {
             ...columnProps,
             Cell: (row, ...args) => {
-              const selected = this.selected({ rowIndex: row.index, column: row.column });
+              const selected = this.selected({ index: row.index, column: row.column });
               const selectData = {
                 onSelect: this.onSelectCell,
                 unselectAllCells: this.unselectAllCells,
@@ -203,12 +210,12 @@ export default (ReactTable, publicConfig) => {
           };
         }
 
-        return columnProps;
+        return column;
       })
     }
 
     render() {
-      const { columns, wrappedInstanceRef, ...props } = this.props;
+      const { columns, wrappedInstanceRef, children, ...props } = this.props;
       this.data = props.data;
       return (
         <ReactTable
@@ -223,6 +230,9 @@ export default (ReactTable, publicConfig) => {
         >
           {(state, makeTable) => {
             this.tableState = state;
+            if (children) {
+              return children(state, makeTable);
+            }
             return makeTable();
           }}
         </ReactTable>
@@ -230,11 +240,13 @@ export default (ReactTable, publicConfig) => {
     }
   }
 
-  ReactTableSelectableCell.propTypes = {
+  ReactTableSelectCell.propTypes = {
     wrappedInstanceRef: PropTypes.func,
     columns: PropTypes.array.isRequired,
     data: PropTypes.array,
+    children: PropTypes.any,
+    onSelectedCellsWillChange: PropTypes.func,
   };
 
-  return ReactTableSelectableCell;
+  return ReactTableSelectCell;
 };

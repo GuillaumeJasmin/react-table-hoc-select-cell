@@ -19,7 +19,7 @@ npm install react-table-hoc-select-cell --save
 import ReactTable from 'react-table';
 import createTable from 'react-table-hoc-selectable-cell';
 
-const ReactTableSelectableCell = createTable(ReactTable, config);
+const ReactTableSelectCell = createTable(ReactTable, config);
 ```
 
 # Config
@@ -56,10 +56,9 @@ In the next example, `name` and `firstname` column can be selected together, and
 ```js
 render () {
   return (
-    <ReactTableSelectableCell
+    <ReactTableSelectCell
       columns={[
         {
-          selectable: true,
           Cell: (row, { selected, selectedCells, onSelect, unselectAllCells }) => {
             const style = { border: selected ? 'border solid 1px' : null };
             return (
