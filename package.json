@@ -1,6 +1,6 @@
 {
     "name": "react-table-hoc-select-cell",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "description": "React Table HOC selectable cells",
     "main": "./lib/index.js",
     "module": "es/index.js",
