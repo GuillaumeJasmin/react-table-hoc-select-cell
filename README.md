@@ -1,8 +1,6 @@
 ReactTable HOC for selectable cells 
 ===================
 
-IMPORTANT: Not yep published on NPM !
-
 ## Commands available
 
 * CLICK
