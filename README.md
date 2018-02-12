@@ -21,7 +21,7 @@ const ReactTableSelectCell = createTable(ReactTable, config);
 ```
 
 # Config
-* ```retrievePrevOriginal``` - {function} - make possible to retrieve previous selected cells even the data was changed. It's usefull when you need to change the order of data and you to keep selected cells.
+* ```retrievePrevOriginal``` - {function} - make possible to retrieve previous selected cells even if the data was changed. It's usefull when you need to change the order of data and you want to keep selected cells.
   ```js
   config = {
     retrievePrevOriginal: (prevOriginal, nextOriginal) => prevOriginal.id === nextOriginal.id

@@ -32,7 +32,6 @@ export default (ReactTable, publicConfig) => {
       this.findIndex = this.findIndex.bind(this);
       this.onSelectCell = this.onSelectCell.bind(this);
       this.unselectAllCells = this.unselectAllCells.bind(this);
-      this.onBlur = this.onBlur.bind(this);
     }
 
     componentWillReceiveProps (nextProps) {
@@ -81,7 +80,6 @@ export default (ReactTable, publicConfig) => {
     onSelectCell (event, row) {
       event.stopPropagation();
       event.preventDefault();
-      clearTimeout(this.timerOnBlur);
       const { enableMultipleColsSelect } = config;
       const { selectedCells } = this.state;
 
@@ -164,15 +162,16 @@ export default (ReactTable, publicConfig) => {
           return { selectedCells };
         });
       } else {
-        this.setState(state => {
-          const index = this.findIndex(cellData);
-          if (index !== -1) {
-            const selectedCells = state.selectedCells.slice();
-            selectedCells.splice(index, 1);
-            return { selectedCells };
-          } else {
-            return { selectedCells: [cellData] }
-          }
+        this.setState(() => {
+          // const index = this.findIndex(cellData);
+          // if (index !== -1) {
+          //   const selectedCells = state.selectedCells.slice();
+          //   selectedCells.splice(index, 1);
+          //   return { selectedCells };
+          // } else {
+          //   return { selectedCells: [cellData] }
+          // }
+          return { selectedCells: [cellData] };
         })
       }
 
@@ -191,12 +190,6 @@ export default (ReactTable, publicConfig) => {
       if (this.state.selectedCells.length) {
         this.setState({ selectedCells: [] });
       }
-    }
-
-    onBlur () {
-      this.timerOnBlur = setTimeout(() => {
-        this.setState({ selectedCells: [] });
-      }, 500);
     }
 
     handleColumnsRecursively (columns) {
@@ -241,10 +234,6 @@ export default (ReactTable, publicConfig) => {
             }
           }}
           columns={this.handleColumnsRecursively(columns)}
-          getProps={() => ({
-            onBlur: this.onBlur,
-            tabIndex: 0,
-          })}
           {...props}
         >
           {(state, makeTable) => {

@@ -7,7 +7,9 @@
     "jsnext:main": "es/index.js",
     "scripts": {
         "build:commonjs": "cross-env BABEL_ENV=commonjs babel src --out-dir lib",
+        "dev:commonjs": "cross-env BABEL_ENV=commonjs babel --watch src --out-dir lib",
         "build:es": "cross-env BABEL_ENV=es babel src --out-dir es",
+        "dev:es": "cross-env BABEL_ENV=es babel --watch src --out-dir es",
         "build:umd": "cross-env BABEL_ENV=rollup NODE_ENV=development rollup -c -o dist/react-table-hoc-select-cell.js",
         "build:umd:min": "cross-env BABEL_ENV=rollup NODE_ENV=production rollup -c -o dist/react-table-hoc-select-cell.min.js",
         "build": "npm run build:commonjs && npm run build:es && npm run build:umd && npm run build:umd:min",
