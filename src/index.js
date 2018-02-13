@@ -1,6 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+const sortSelectedCells = (selectedCells) => {
+  return selectedCells.sort((a, b) => {
+    if (a.viewIndex > b.viewIndex) return 1;
+    if (a.viewIndex < b.viewIndex) return -1;
+    return 0;
+  });
+}
+
 /**
  *
  * @param {ReactTable} ReactTable - ReactTable instance
@@ -54,7 +62,7 @@ export default (ReactTable, publicConfig) => {
           });
 
           return {
-            selectedCells: nextSelectedCells
+            selectedCells: sortSelectedCells(nextSelectedCells)
           }
         });
       }
@@ -122,11 +130,11 @@ export default (ReactTable, publicConfig) => {
           this.setState((state) => {
             const selectedCells = state.selectedCells.slice();
             selectedCells.splice(index, 1);
-            return { selectedCells };
+            return { selectedCells: sortSelectedCells(selectedCells) };
           });
         } else {
           this.setState(state => ({
-            selectedCells: [...state.selectedCells, cellData],
+            selectedCells: sortSelectedCells([...state.selectedCells, cellData]),
           }));
         }
       } else if (event.shiftKey && this.lastSelectedCell) {
@@ -159,7 +167,7 @@ export default (ReactTable, publicConfig) => {
             }
           }
 
-          return { selectedCells };
+          return { selectedCells: sortSelectedCells(selectedCells) };
         });
       } else {
         this.setState(() => {
@@ -171,7 +179,7 @@ export default (ReactTable, publicConfig) => {
           // } else {
           //   return { selectedCells: [cellData] }
           // }
-          return { selectedCells: [cellData] };
+          return { selectedCells: sortSelectedCells([cellData]) };
         })
       }
 
