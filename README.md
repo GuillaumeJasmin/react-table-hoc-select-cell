@@ -51,16 +51,18 @@ In the next example, `name` and `firstname` column can be selected together, and
 
 # Render
 
+Select data are inject as second parameter of `Cell`
+
 ```js
 render () {
   return (
     <ReactTableSelectCell
       columns={[
         {
-          Cell: (row, { selected, selectedCells, onSelect, unselectAllCells }) => {
+          Cell: (row, { selected, getSelectedCells, onSelect, unselectAllCells }) => {
             const style = { border: selected ? 'border solid 1px' : null };
             return (
-              <div onClick={onSelect} style={style}>
+              <div onClick={event => onSelect(event, row)} style={style}>
                 {row.value}
               <div/>
             )
@@ -72,5 +74,22 @@ render () {
 }
 ```
 
-# Public methods
-* unselectAllCells - make possible to unselect all cells
+## Select data
+
+* ```selected```  {bool} - `true` if cell is selected 
+
+
+* ```getSelectedCells``` {func} - return array of selected cells
+
+
+* ```selectedCells``` - DEPRECATED {array} - array of selected cells. Use `getSelectedCells` instead. It's deprecated because it can create issue if you use cell as PureComponent, all cells will be rerender when `selectedCells` change.
+
+
+* ```onSelect``` {func} - Use to select a cell. It take `event` and `row` arguments 
+
+
+* ```unselectAllCells``` {func} - unselect all selected cells. 
+
+## Public methods
+* getSelectedCells
+* unselectAllCells

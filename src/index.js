@@ -38,6 +38,7 @@ export default (ReactTable, publicConfig) => {
       this.lastSelectedCell = null;
       this.selected = this.selected.bind(this);
       this.findIndex = this.findIndex.bind(this);
+      this.getSelectedCells = this.getSelectedCells.bind(this);
       this.onSelectCell = this.onSelectCell.bind(this);
       this.unselectAllCells = this.unselectAllCells.bind(this);
     }
@@ -194,6 +195,10 @@ export default (ReactTable, publicConfig) => {
       return this.wrappedInstance;
     }
 
+    getSelectedCells () {
+      return this.state.selectedCells;
+    }
+
     unselectAllCells () {
       if (this.state.selectedCells.length) {
         this.setState({ selectedCells: [] });
@@ -217,7 +222,8 @@ export default (ReactTable, publicConfig) => {
               const selectData = {
                 onSelect: this.onSelectCell,
                 unselectAllCells: this.unselectAllCells,
-                selectedCells,
+                selectedCells, // deprecated
+                getSelectedCells: this.getSelectedCells,
                 selected,
               };
               const nextArgs = [...args, selectData];
