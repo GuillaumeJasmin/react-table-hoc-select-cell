@@ -51,7 +51,7 @@ In the next example, `name` and `firstname` column can be selected together, and
 
 # Render
 
-Select data are inject as second parameter of `Cell`
+Select data are injected as second parameter of `Cell`:
 
 ```js
 render () {
@@ -59,7 +59,7 @@ render () {
     <ReactTableSelectCell
       columns={[
         {
-          Cell: (row, { selected, getSelectedCells, onSelect, unselectAllCells }) => {
+          Cell: (row, { selected, onSelect }) => {
             const style = { border: selected ? 'border solid 1px' : null };
             return (
               <div onClick={event => onSelect(event, row)} style={style}>
@@ -90,6 +90,21 @@ render () {
 
 * ```unselectAllCells``` {func} - unselect all selected cells. 
 
+## Ref
+
+You can use `wrappedInstanceRef` props to get the ref of ReactTable:
+```js
+render () {
+  return (
+    <ReactTableSelectCell
+      wrappedInstanceRef={(ref) => { this.tableRef = ref; }}
+      ...
+    >
+  )
+}
+```
+
 ## Public methods
 * getSelectedCells
 * unselectAllCells
+* getWrappedInstance
