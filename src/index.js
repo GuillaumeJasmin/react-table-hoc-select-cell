@@ -93,10 +93,10 @@ export default (ReactTable, publicConfig) => {
       const { selectedCells } = this.state;
 
       let cellData = {
-        index: row.index,
+        index: config.getIndex(row),
         viewIndex: row.viewIndex,
         column: row.column,
-        original: row.original,
+        original: config.getOriginal(row),
       };
 
       let replace = false;
@@ -207,7 +207,7 @@ export default (ReactTable, publicConfig) => {
 
     handleCell (keyElement, columnProps) {
       return (row, ...args) => {
-        const selected = this.selected({ index: row.index, column: row.column });
+        const selected = this.selected({ index: config.getIndex(row), column: row.column });
         const selectData = {
           onSelect: this.onSelectCell,
           unselectAllCells: this.unselectAllCells,
