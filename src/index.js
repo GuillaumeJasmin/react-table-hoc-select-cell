@@ -205,8 +205,21 @@ export default (ReactTable, publicConfig) => {
       }
     }
 
+    handleCell (keyElement, columnProps) {
+      return (row, ...args) => {
+        const selected = this.selected({ index: row.index, column: row.column });
+        const selectData = {
+          onSelect: this.onSelectCell,
+          unselectAllCells: this.unselectAllCells,
+          getSelectedCells: this.getSelectedCells,
+          selected,
+        };
+        const nextArgs = [...args, selectData];
+        return columnProps[keyElement](row, ...nextArgs);
+      };
+    }
+
     handleColumnsRecursively (columns) {
-      const { selectedCells } = this.state;
       return columns.map((column) => {
         const { columns, ...columnProps } = column;
         if (columns) {
@@ -214,25 +227,17 @@ export default (ReactTable, publicConfig) => {
             ...columnProps,
             columns: this.handleColumnsRecursively(columns),
           }
-        } else if (columnProps.Cell) {
-          return {
-            ...columnProps,
-            Cell: (row, ...args) => {
-              const selected = this.selected({ index: row.index, column: row.column });
-              const selectData = {
-                onSelect: this.onSelectCell,
-                unselectAllCells: this.unselectAllCells,
-                selectedCells, // deprecated
-                getSelectedCells: this.getSelectedCells,
-                selected,
-              };
-              const nextArgs = [...args, selectData];
-              return columnProps.Cell(row, ...nextArgs);
-            },
-          };
         }
 
-        return column;
+        return {
+          ...columnProps,
+          Cell: columnProps.Cell && this.handleCell('Cell', columnProps),
+          Aggregated: columnProps.Aggregated && this.handleCell('Aggregated', columnProps),
+          Pivot: columnProps.Pivot && this.handleCell('Pivot', columnProps),
+          PivotValue: columnProps.PivotValue && this.handleCell('PivotValue', columnProps),
+          Footer: columnProps.Footer && this.handleCell('Footer', columnProps),
+          Expander: columnProps.Expander && this.handleCell('Expander', columnProps)
+        };
       })
     }
 
